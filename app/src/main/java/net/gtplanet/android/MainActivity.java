@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA}, 1);
         }
 
-        webview = (WebView) findViewById(R.id.webView);
+        webview = findViewById(R.id.webView);
         assert webview != null;
         WebSettings webSettings = webview.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -185,6 +185,7 @@ public class MainActivity extends AppCompatActivity {
     }
     // Inject CSS method: read style.css from assets folder
     // Append stylesheet to document head
+    // IT DOESNT WORK ARGH
     private void injectCSS() {
         try {
             InputStream inputStream = getAssets().open("style.css");
