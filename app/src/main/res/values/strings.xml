@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">GTPlanet</string>
     <string name="action_settings">Coded with ❤ by cbabb</string>
+    <string name="creation">Couldn\'t create image.</string>
+    <string name="pickimg">Image Chooser</string>
+    <string name="err">Loading failed.</string>
 </resources>

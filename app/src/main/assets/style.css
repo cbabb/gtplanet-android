@@ -1,5 +1,28 @@
 body {
 	-webkit-tap-highlight-color: rgba(0, 74, 149, 0.5) !important;
-	background: #333333 !important;
 	
+	
+}
+.breadcrumb .crust {
+    display: block;
+    float: left;
+    position: relative;
+    zoom: 1;
+    max-width: 35%;
+    margin: 5px auto;
+}
+a.gtp-loginLink {
+    background: #004a95;
+    border: 1px solid #00398f;
+    border-radius: 4px;
+    padding: 2px 7px;
+    color: #fff;
+    text-decoration: none;
+}
+.navTabs .visitorTabs {
+    float: right;
+    margin: 6px auto;
+}
+.nodeInfo.categoryNodeInfo.categoryStrip {
+    border-radius: 3px;
 }

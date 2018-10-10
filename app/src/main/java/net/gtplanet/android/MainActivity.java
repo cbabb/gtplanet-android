@@ -105,11 +105,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if(Build.VERSION.SDK_INT >=23 && (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
+        if(Build.VERSION.SDK_INT >=23 && (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED))
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA}, 1);
-        }
 
         webview = findViewById(R.id.webView);
+        webview.getSettings().setJavaScriptEnabled(true);
+        webview.getSettings().setDomStorageEnabled(true);
         assert webview != null;
         WebSettings webSettings = webview.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -126,20 +127,39 @@ public class MainActivity extends AppCompatActivity {
                 super.onPageFinished(view, url);
             }
         });
-        webview.getSettings().setJavaScriptEnabled(true);
-        webview.getSettings().setDomStorageEnabled(true);
+
+
         webview.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
         webview.setWebViewClient(new Callback());
         webview.loadUrl("http://www.gtplanet.net/");
 
 
+
+
+    }
+    public void injectCSS() {
+        try {
+            InputStream inputStream = getAssets().open ("src/main/assets/style.css");
+            byte[] buffer = new byte[inputStream.available()];
+            inputStream.read(buffer);
+            inputStream.close();
+            String encoded = Base64.encodeToString(buffer, Base64.NO_WRAP);
+            webview.loadUrl("javascript:(function() {" +
+                    "var parent = document.getElementsByTagName('head').item(0);" +
+                    "var style = document.createElement('style');" +
+                    "style.type = 'text/css';" +
+                    "style.innerHTML = window.atob('" + encoded + "');" +
+                    "parent.appendChild(style)" +
+                    "})()");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         webview.setWebChromeClient(new WebChromeClient(){
             public boolean onShowFileChooser(
                     WebView webview, ValueCallback<Uri[]> filePathCallback,
                     FileChooserParams fileChooserParams){
-                if(mUMA != null){
-                    mUMA.onReceiveValue(null);
-                }
+                if(mUMA != null) mUMA.onReceiveValue(null);
                 mUMA = filePathCallback;
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if(takePictureIntent.resolveActivity(MainActivity.this.getPackageManager()) != null){
@@ -148,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
                         photoFile = createImageFile();
                         takePictureIntent.putExtra("PhotoPath", mCM);
                     }catch(IOException ex){
-                        Log.e(TAG, "Oops! Failed to create image.", ex);
+                        Log.e(TAG, getString(R.string.creation), ex);
                     }
                     if(photoFile != null){
                         mCM = "file:" + photoFile.getAbsolutePath();
@@ -172,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
 
                 Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
                 chooserIntent.putExtra(Intent.EXTRA_INTENT, contentSelectionIntent);
-                chooserIntent.putExtra(Intent.EXTRA_TITLE, "Image Chooser");
+                chooserIntent.putExtra(Intent.EXTRA_TITLE, R.string.pickimg);
                 chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentArray);
                 if(multiple_files) {
                     chooserIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
@@ -181,34 +201,11 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-
-    }
-    // Inject CSS method: read style.css from assets folder
-    // Append stylesheet to document head
-    // IT DOESNT WORK ARGH
-    private void injectCSS() {
-        try {
-            InputStream inputStream = getAssets().open("style.css");
-            byte[] buffer = new byte[inputStream.available()];
-            inputStream.read(buffer);
-            inputStream.close();
-            String encoded = Base64.encodeToString(buffer, Base64.NO_WRAP);
-            webview.loadUrl("javascript:(function() {" +
-                    "var parent = document.getElementsByTagName('head').item(0);" +
-                    "var style = document.createElement('style');" +
-                    "style.type = 'text/css';" +
-                    // Tell the browser to BASE64-decode the string into your script !!!
-                    "style.innerHTML = window.atob('" + encoded + "');" +
-                    "parent.appendChild(style)" +
-                    "})()");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     class Callback extends WebViewClient{
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl){
-            Toast.makeText(getApplicationContext(), "Oops! There was error loading.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), getString(R.string.err), Toast.LENGTH_SHORT).show();
         }
     }
     private File createImageFile() throws IOException{
